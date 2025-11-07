@@ -1,0 +1,7 @@
+.husky
+.dockerignore
+.gitignore
+.prettierignore
+Dockerfile
+**/*.svg
+**/*.ico
