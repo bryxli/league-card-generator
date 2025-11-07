@@ -1,31 +1,9 @@
 import fetch from "node-fetch";
+import type { AccountDto, RiotErrorBody } from "./types";
+import { RiotApiError } from "./errors";
 
 const RIOT_KEY = process.env.RIOT_API_KEY!;
 const REGION = "americas";
-
-type AccountDto = {
-  puuid: string;
-  gameName: string;
-};
-
-type RiotErrorBody = {
-  status: {
-    message: string;
-    status_code: number;
-  };
-};
-
-class RiotApiError extends Error {
-  public statusCode: number;
-  public body: string;
-
-  constructor(statusCode: number, body: RiotErrorBody, message?: string) {
-    super(message || "Riot API request failed");
-    this.statusCode = statusCode;
-    this.body = body.status.message;
-    Object.setPrototypeOf(this, RiotApiError.prototype);
-  }
-}
 
 async function getAccountDtoByRiotId(
   gameName: string,
