@@ -1,9 +1,10 @@
 import fetch from "node-fetch";
-import type { AccountDto, RiotErrorBody } from "./types";
+import type { AccountDto, ChampionMasteryDto, RiotErrorBody } from "./types";
 import { RiotApiError } from "./errors";
 
 const RIOT_KEY = process.env.RIOT_API_KEY!;
 const REGION = "americas";
+const SERVER = "na1";
 
 async function getAccountDtoByRiotId(
   gameName: string,
@@ -29,6 +30,27 @@ async function getAccountDtoByRiotId(
   return body as AccountDto;
 }
 
+async function getAllChampionMasteryDtoByPuuid(puuid: string): Promise<any[]> {
+  const res = await fetch(
+    `https://${SERVER}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`,
+    {
+      headers: { "X-Riot-Token": RIOT_KEY },
+    },
+  );
+
+  const body = await res.json();
+
+  if (!res.ok) {
+    throw new RiotApiError(
+      res.status,
+      body as RiotErrorBody,
+      `Failed to fetch champion mastery for puuid ${puuid}`,
+    );
+  }
+
+  return body as ChampionMasteryDto[];
+}
+
 export async function handler(event: any) {
   const query = event.queryStringParameters || {};
   const gameName = query.gameName;
@@ -48,7 +70,11 @@ export async function handler(event: any) {
 
   try {
     const accountDto = await getAccountDtoByRiotId(gameName, tagLine);
-    return accountDto;
+    const championMasteryDtos = await getAllChampionMasteryDtoByPuuid(
+      accountDto.puuid,
+    );
+
+    return championMasteryDtos;
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {
