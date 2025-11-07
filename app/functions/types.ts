@@ -61,6 +61,13 @@ export type MatchDTO = {
   };
 };
 
+export type SummonerDTO = {
+  profileIconId: number;
+  revisionDate: number;
+  puuid: string;
+  summonerLevel: number;
+};
+
 export type RiotErrorBody = {
   status: {
     message: string;

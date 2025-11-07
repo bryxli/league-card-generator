@@ -5,6 +5,7 @@ import type {
   LeagueEntryDTO,
   MatchDTO,
   RiotErrorBody,
+  SummonerDTO,
 } from "./types";
 import { RiotApiError } from "./errors";
 
@@ -127,6 +128,27 @@ async function getMatchDTOById(matchId: string): Promise<MatchDTO> {
   return body as MatchDTO;
 }
 
+async function getSummonerDTOByPuuid(puuid: string): Promise<SummonerDTO> {
+  const res = await fetch(
+    `https://${SERVER}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`,
+    {
+      headers: { "X-Riot-Token": RIOT_KEY },
+    },
+  );
+
+  const body = await res.json();
+
+  if (!res.ok) {
+    throw new RiotApiError(
+      res.status,
+      body as RiotErrorBody,
+      `Failed to fetch summoner for puuid ${puuid}`,
+    );
+  }
+
+  return body as SummonerDTO;
+}
+
 export async function handler(event: any) {
   const query = event.queryStringParameters || {};
   const gameName = query.gameName;
@@ -152,8 +174,9 @@ export async function handler(event: any) {
     const leagueEntryDTOs = await getAllLeagueEntryDTOByPuuid(accountDTO.puuid);
     const matchIds = await getMatchIdsByPuuid(accountDTO.puuid);
     const matchDTO = await getMatchDTOById(matchIds[0]);
+    const summonerDTO = await getSummonerDTOByPuuid(accountDTO.puuid);
 
-    return matchDTO;
+    return summonerDTO;
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {
