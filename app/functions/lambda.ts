@@ -1,3 +1,4 @@
+import { getChampionById } from "./champion";
 import { RiotApiError } from "./errors";
 import {
   getAccountDTOByRiotId,
@@ -35,7 +36,10 @@ export async function handler(event: any) {
     const matchDTO = await getMatchDTOById(matchIds[0]);
     const summonerDTO = await getSummonerDTOByPuuid(accountDTO.puuid);
 
-    return summonerDTO;
+    const championId = championMasteryDTOs[0].championId.toString();
+    const championData = getChampionById(championId);
+
+    return championData;
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {
