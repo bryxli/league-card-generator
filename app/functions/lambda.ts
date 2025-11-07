@@ -1,13 +1,6 @@
-import { getChampionById } from "./champion";
+import { consolidateChampionData } from "./data";
 import { RiotApiError } from "./errors";
-import {
-  getAccountDTOByRiotId,
-  getAllChampionMasteryDTOByPuuid,
-  getAllLeagueEntryDTOByPuuid,
-  getMatchDTOById,
-  getMatchIdsByPuuid,
-  getSummonerDTOByPuuid,
-} from "./riot";
+import { getAccountDTOByRiotId } from "./riot";
 
 export async function handler(event: any) {
   const query = event.queryStringParameters || {};
@@ -28,23 +21,19 @@ export async function handler(event: any) {
 
   try {
     const accountDTO = await getAccountDTOByRiotId(gameName, tagLine);
-    const championMasteryDTOs = await getAllChampionMasteryDTOByPuuid(
-      accountDTO.puuid,
-    );
-    const leagueEntryDTOs = await getAllLeagueEntryDTOByPuuid(accountDTO.puuid);
-    const matchIds = await getMatchIdsByPuuid(accountDTO.puuid);
-    const matchDTO = await getMatchDTOById(matchIds[0]);
-    const summonerDTO = await getSummonerDTOByPuuid(accountDTO.puuid);
+    const puuid = accountDTO.puuid;
 
-    const championId = championMasteryDTOs[0].championId.toString();
-    const championData = getChampionById(championId);
-
-    return championData;
+    return await consolidateChampionData(puuid);
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {
         statusCode: error.statusCode,
         body: error.body,
+      };
+    } else if (error instanceof Error) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: error.message }),
       };
     }
 

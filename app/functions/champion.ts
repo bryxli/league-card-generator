@@ -1,4 +1,5 @@
 import championData from "./champion.json";
+import type { Champion } from "./types";
 
 /**
  * Retrieves the champion for a given champion id.
@@ -7,7 +8,7 @@ import championData from "./champion.json";
  * @param {string} id - Champion id.
  * @returns {Object} The champion object.
  */
-export function getChampionById(id: string): Object | null {
+export function getChampionById(id: string): Champion {
   return (
     Object.values(championData.data).filter(
       (champion) => champion.key === id,

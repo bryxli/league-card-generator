@@ -88,3 +88,13 @@ export type RiotErrorBody = {
     status_code: number;
   };
 };
+
+export type Champion = {
+  // TODO: expand type
+  name: string;
+};
+
+export type ChampionData = {
+  name: string;
+  level: number;
+};
