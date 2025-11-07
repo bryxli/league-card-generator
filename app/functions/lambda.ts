@@ -28,7 +28,7 @@ export async function handler(event: any) {
     const accountDTO = await getAccountDTOByRiotId(gameName, tagLine);
     const puuid = accountDTO.puuid;
 
-    return await consolidateMatchData(puuid);
+    return await consolidateChampionData(puuid);
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {

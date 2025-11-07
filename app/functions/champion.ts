@@ -9,9 +9,9 @@ import type { Champion } from "./types";
  * @returns {Object} The champion object.
  */
 export function getChampionById(id: string): Champion {
-  return (
-    Object.values(championData.data).filter(
-      (champion) => champion.key === id,
-    )[0] || null
+  const champion = Object.values(championData.data).find(
+    (champion) => champion.key === id,
   );
+  if (!champion) throw new Error(`Champion data not found for id: ${id}`);
+  return champion;
 }

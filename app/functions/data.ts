@@ -18,21 +18,24 @@ export async function consolidateChampionData(
 ): Promise<ChampionData[]> {
   const championMasteryDTOs = await getAllChampionMasteryDTOByPuuid(puuid);
 
-  return championMasteryDTOs.map((masterDTO) => {
-    const championId = masterDTO.championId.toString();
-    const championData = getChampionById(championId);
+  return championMasteryDTOs
+    .map((masterDTO) => {
+      const championId = masterDTO.championId.toString();
 
-    if (!championData) {
-      throw new Error(`Champion data not found for id: ${championId}`);
-    }
+      try {
+        const championData = getChampionById(championId);
 
-    const championName = championData.name;
+        const championName = championData.name;
 
-    return {
-      name: championName,
-      level: masterDTO.championLevel,
-    };
-  });
+        return {
+          name: championName,
+          level: masterDTO.championLevel,
+        };
+      } catch (error) {
+        return undefined;
+      }
+    })
+    .filter(Boolean) as ChampionData[];
 }
 
 export async function consolidateRankedData(
