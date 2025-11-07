@@ -106,3 +106,30 @@ export type RankedData = {
   wins: number;
   losses: number;
 };
+
+export type MatchData = {
+  assists: number;
+  baronKills: number;
+  champLevel: number;
+  championName: string;
+  deaths: number;
+  dragonKills: number;
+  firstBloodKill: boolean;
+  firstTowerKill: boolean;
+  goldEarned: number;
+  kills: number;
+  pentaKills: number;
+  summonerLevel: number;
+  summonerName: string;
+  teamEarlySurrendered: boolean;
+  teamPosition: string;
+  timePlayed: number;
+  totalDamageDealtToChampions: number;
+  totalMinionsKilled: number;
+  turretKills: number;
+  turretTakedowns: number;
+  visionScore: number;
+  wardsKilled: number;
+  wardsPlaced: number;
+  win: boolean;
+};

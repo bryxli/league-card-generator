@@ -2,9 +2,11 @@ import { getChampionById } from "./champion";
 import {
   getAllChampionMasteryDTOByPuuid,
   getAllLeagueEntryDTOByPuuid,
+  getMatchDTOById,
+  getMatchIdsByPuuid,
   getSummonerDTOByPuuid,
 } from "./riot";
-import type { ChampionData, RankedData } from "./types";
+import type { ChampionData, MatchData, RankedData } from "./types";
 
 export async function getSummonerLevel(puuid: string): Promise<number> {
   const summonerDTO = await getSummonerDTOByPuuid(puuid);
@@ -44,4 +46,43 @@ export async function consolidateRankedData(
     wins: leagueEntryDTO.wins,
     losses: leagueEntryDTO.losses,
   }));
+}
+
+export async function consolidateMatchData(
+  puuid: string,
+): Promise<MatchData[]> {
+  const matchIds = await getMatchIdsByPuuid(puuid, 16); // Set to retrieve last 16 matches due to rate limit of 20 requests/second
+  return await Promise.all(
+    matchIds.map(async (matchId) => {
+      const matchDTO = await getMatchDTOById(matchId);
+      const participants = matchDTO.info.participants;
+      const participant = participants.find((p) => p.puuid === puuid);
+      return {
+        assists: participant.assists,
+        baronKills: participant.baronKills,
+        champLevel: participant.champLevel,
+        championName: participant.championName,
+        deaths: participant.deaths,
+        dragonKills: participant.dragonKills,
+        firstBloodKill: participant.firstBloodKill,
+        firstTowerKill: participant.firstTowerKill,
+        goldEarned: participant.goldEarned,
+        kills: participant.kills,
+        pentaKills: participant.pentaKills,
+        summonerLevel: participant.summonerLevel,
+        summonerName: participant.summonerName,
+        teamEarlySurrendered: participant.teamEarlySurrendered,
+        teamPosition: participant.teamPosition,
+        timePlayed: participant.timePlayed,
+        totalDamageDealtToChampions: participant.totalDamageDealtToChampions,
+        totalMinionsKilled: participant.totalMinionsKilled,
+        turretKills: participant.turretKills,
+        turretTakedowns: participant.turretTakedowns,
+        visionScore: participant.visionScore,
+        wardsKilled: participant.wardsKilled,
+        wardsPlaced: participant.wardsPlaced,
+        win: participant.win,
+      };
+    }),
+  );
 }
