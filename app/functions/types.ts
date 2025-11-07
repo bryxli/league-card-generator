@@ -35,6 +35,32 @@ export type LeagueEntryDTO = {
   miniSeries: any; // TODO: define type
 };
 
+export type MatchDto = {
+  metadata: {
+    dataVersion: string;
+    matchId: string;
+    participants: string[];
+  };
+  info: {
+    endOfGameResult: string;
+    gameCreation: number;
+    gameDuration: number;
+    gameEndTimestamp: number;
+    gameId: number;
+    gameMode: string;
+    gameName: string;
+    gameStartTimestamp: number;
+    gameType: string;
+    gameVersion: string;
+    mapId: number;
+    participants: any[]; // TODO: define type
+    platformId: string;
+    queueId: number;
+    teams: any[]; // TODO: define type
+    tournamentCode: string;
+  };
+};
+
 export type RiotErrorBody = {
   status: {
     message: string;

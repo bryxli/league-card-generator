@@ -3,6 +3,7 @@ import type {
   AccountDto,
   ChampionMasteryDto,
   LeagueEntryDTO,
+  MatchDto,
   RiotErrorBody,
 } from "./types";
 import { RiotApiError } from "./errors";
@@ -77,6 +78,51 @@ async function getAllLeagueRanksByPuuid(puuid: string): Promise<any[]> {
   return body as LeagueEntryDTO[];
 }
 
+async function getMatchIdsByPuuid(
+  puuid: string,
+  count: number = 20,
+): Promise<string[]> {
+  const res = await fetch(
+    `https://${REGION}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=${count}`,
+    {
+      headers: { "X-Riot-Token": RIOT_KEY },
+    },
+  );
+
+  const body = await res.json();
+
+  if (!res.ok) {
+    throw new RiotApiError(
+      res.status,
+      body as RiotErrorBody,
+      `Failed to fetch match ids for puuid ${puuid}`,
+    );
+  }
+
+  return body as string[];
+}
+
+async function getMatchById(matchId: string): Promise<MatchDto> {
+  const res = await fetch(
+    `https://${REGION}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
+    {
+      headers: { "X-Riot-Token": RIOT_KEY },
+    },
+  );
+
+  const body = await res.json();
+
+  if (!res.ok) {
+    throw new RiotApiError(
+      res.status,
+      body as RiotErrorBody,
+      `Failed to fetch match for match id ${matchId}`,
+    );
+  }
+
+  return body as MatchDto;
+}
+
 export async function handler(event: any) {
   const query = event.queryStringParameters || {};
   const gameName = query.gameName;
@@ -100,8 +146,10 @@ export async function handler(event: any) {
       accountDto.puuid,
     );
     const leagueEntryDtos = await getAllLeagueRanksByPuuid(accountDto.puuid);
+    const matchIds = await getMatchIdsByPuuid(accountDto.puuid);
+    const matchDto = await getMatchById(matchIds[0]);
 
-    return leagueEntryDtos;
+    return matchDto;
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {
