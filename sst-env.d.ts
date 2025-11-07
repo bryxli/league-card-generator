@@ -9,6 +9,11 @@ declare module "sst" {
       type: "sst.aws.React";
       url: string;
     };
+    "league-card-generator-handler": {
+      name: string;
+      type: "sst.aws.Function";
+      url: string;
+    };
   }
 }
 /// <reference path="sst-env.d.ts" />

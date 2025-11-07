@@ -10,6 +10,18 @@ export default $config({
     };
   },
   async run() {
-    new sst.aws.React("league-card-generator-app");
+    const lambda = new sst.aws.Function("league-card-generator-handler", {
+      handler: "app/functions/lambda.handler",
+      url: true,
+      environment: {
+        RIOT_API_KEY: process.env.RIOT_API_KEY!,
+      },
+    });
+
+    const site = new sst.aws.React("league-card-generator-app", {
+      environment: {
+        HANDLER_URL: lambda.url,
+      },
+    });
   },
 });
