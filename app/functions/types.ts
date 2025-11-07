@@ -1,9 +1,9 @@
-export type AccountDto = {
+export type AccountDTO = {
   puuid: string;
   gameName: string;
 };
 
-export type ChampionMasteryDto = {
+export type ChampionMasteryDTO = {
   puuid: string;
   championPointsUntilNextLevel: number;
   chestGranted: boolean;
@@ -35,7 +35,7 @@ export type LeagueEntryDTO = {
   miniSeries: any; // TODO: define type
 };
 
-export type MatchDto = {
+export type MatchDTO = {
   metadata: {
     dataVersion: string;
     matchId: string;

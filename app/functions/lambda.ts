@@ -1,9 +1,9 @@
 import fetch from "node-fetch";
 import type {
-  AccountDto,
-  ChampionMasteryDto,
+  AccountDTO,
+  ChampionMasteryDTO,
   LeagueEntryDTO,
-  MatchDto,
+  MatchDTO,
   RiotErrorBody,
 } from "./types";
 import { RiotApiError } from "./errors";
@@ -12,10 +12,10 @@ const RIOT_KEY = process.env.RIOT_API_KEY!;
 const REGION = "americas";
 const SERVER = "na1";
 
-async function getAccountDtoByRiotId(
+async function getAccountDTOByRiotId(
   gameName: string,
   tagLine: string,
-): Promise<AccountDto> {
+): Promise<AccountDTO> {
   const res = await fetch(
     `https://${REGION}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`,
     {
@@ -33,10 +33,12 @@ async function getAccountDtoByRiotId(
     );
   }
 
-  return body as AccountDto;
+  return body as AccountDTO;
 }
 
-async function getAllChampionMasteryDtoByPuuid(puuid: string): Promise<any[]> {
+async function getAllChampionMasteryDTOByPuuid(
+  puuid: string,
+): Promise<ChampionMasteryDTO[]> {
   const res = await fetch(
     `https://${SERVER}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`,
     {
@@ -54,10 +56,12 @@ async function getAllChampionMasteryDtoByPuuid(puuid: string): Promise<any[]> {
     );
   }
 
-  return body as ChampionMasteryDto[];
+  return body as ChampionMasteryDTO[];
 }
 
-async function getAllLeagueRanksByPuuid(puuid: string): Promise<any[]> {
+async function getAllLeagueEntryDTOByPuuid(
+  puuid: string,
+): Promise<LeagueEntryDTO[]> {
   const res = await fetch(
     `https://${SERVER}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`,
     {
@@ -102,7 +106,7 @@ async function getMatchIdsByPuuid(
   return body as string[];
 }
 
-async function getMatchById(matchId: string): Promise<MatchDto> {
+async function getMatchDTOById(matchId: string): Promise<MatchDTO> {
   const res = await fetch(
     `https://${REGION}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
     {
@@ -120,7 +124,7 @@ async function getMatchById(matchId: string): Promise<MatchDto> {
     );
   }
 
-  return body as MatchDto;
+  return body as MatchDTO;
 }
 
 export async function handler(event: any) {
@@ -141,15 +145,15 @@ export async function handler(event: any) {
   }
 
   try {
-    const accountDto = await getAccountDtoByRiotId(gameName, tagLine);
-    const championMasteryDtos = await getAllChampionMasteryDtoByPuuid(
-      accountDto.puuid,
+    const accountDTO = await getAccountDTOByRiotId(gameName, tagLine);
+    const championMasteryDTOs = await getAllChampionMasteryDTOByPuuid(
+      accountDTO.puuid,
     );
-    const leagueEntryDtos = await getAllLeagueRanksByPuuid(accountDto.puuid);
-    const matchIds = await getMatchIdsByPuuid(accountDto.puuid);
-    const matchDto = await getMatchById(matchIds[0]);
+    const leagueEntryDTOs = await getAllLeagueEntryDTOByPuuid(accountDTO.puuid);
+    const matchIds = await getMatchIdsByPuuid(accountDTO.puuid);
+    const matchDTO = await getMatchDTOById(matchIds[0]);
 
-    return matchDto;
+    return matchDTO;
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {
