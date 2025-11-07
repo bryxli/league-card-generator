@@ -14,7 +14,16 @@ export type ChampionMasteryDTO = {
   championPointsSinceLastLevel: number;
   markRequiredForNextLevel: number;
   championSeasonMilestone: number;
-  nextSeasonMilestone: any; // TODO: define type
+  nextSeasonMilestone: {
+    requireGradeCounts: Object;
+    rewardMarks: number;
+    bonus: boolean;
+    rewardConfig: {
+      rewardValue: string;
+      rewardType: string;
+      maximumReward: number;
+    };
+  };
   tokensEarned: number;
   milestoneGrades: string[];
 };
@@ -32,7 +41,12 @@ export type LeagueEntryDTO = {
   veteran: boolean;
   freshBlood: boolean;
   inactive: boolean;
-  miniSeries: any; // TODO: define type
+  miniSeries: {
+    losses: number;
+    progress: string;
+    target: number;
+    wins: number;
+  };
 };
 
 export type MatchDTO = {
