@@ -1,5 +1,10 @@
 import fetch from "node-fetch";
-import type { AccountDto, ChampionMasteryDto, RiotErrorBody } from "./types";
+import type {
+  AccountDto,
+  ChampionMasteryDto,
+  LeagueEntryDTO,
+  RiotErrorBody,
+} from "./types";
 import { RiotApiError } from "./errors";
 
 const RIOT_KEY = process.env.RIOT_API_KEY!;
@@ -51,6 +56,27 @@ async function getAllChampionMasteryDtoByPuuid(puuid: string): Promise<any[]> {
   return body as ChampionMasteryDto[];
 }
 
+async function getAllLeagueRanksByPuuid(puuid: string): Promise<any[]> {
+  const res = await fetch(
+    `https://${SERVER}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`,
+    {
+      headers: { "X-Riot-Token": RIOT_KEY },
+    },
+  );
+
+  const body = await res.json();
+
+  if (!res.ok) {
+    throw new RiotApiError(
+      res.status,
+      body as RiotErrorBody,
+      `Failed to fetch league ranks for puuid ${puuid}`,
+    );
+  }
+
+  return body as LeagueEntryDTO[];
+}
+
 export async function handler(event: any) {
   const query = event.queryStringParameters || {};
   const gameName = query.gameName;
@@ -73,8 +99,9 @@ export async function handler(event: any) {
     const championMasteryDtos = await getAllChampionMasteryDtoByPuuid(
       accountDto.puuid,
     );
+    const leagueEntryDtos = await getAllLeagueRanksByPuuid(accountDto.puuid);
 
-    return championMasteryDtos;
+    return leagueEntryDtos;
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {
