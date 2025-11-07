@@ -98,3 +98,11 @@ export type ChampionData = {
   name: string;
   level: number;
 };
+
+export type RankedData = {
+  queueType: string;
+  tier: string;
+  rank: string;
+  wins: number;
+  losses: number;
+};

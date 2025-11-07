@@ -1,6 +1,9 @@
 import { getChampionById } from "./champion";
-import { getAllChampionMasteryDTOByPuuid } from "./riot";
-import type { ChampionData } from "./types";
+import {
+  getAllChampionMasteryDTOByPuuid,
+  getAllLeagueEntryDTOByPuuid,
+} from "./riot";
+import type { ChampionData, RankedData } from "./types";
 
 export async function consolidateChampionData(
   puuid: string,
@@ -22,4 +25,17 @@ export async function consolidateChampionData(
       level: masterDTO.championLevel,
     };
   });
+}
+
+export async function consolidateRankedData(
+  puuid: string,
+): Promise<RankedData[]> {
+  const leagueEntryDTOs = await getAllLeagueEntryDTOByPuuid(puuid);
+  return leagueEntryDTOs.map((leagueEntryDTO) => ({
+    queueType: leagueEntryDTO.queueType,
+    tier: leagueEntryDTO.tier,
+    rank: leagueEntryDTO.rank,
+    wins: leagueEntryDTO.wins,
+    losses: leagueEntryDTO.losses,
+  }));
 }
