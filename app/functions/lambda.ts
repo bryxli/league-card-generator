@@ -1,4 +1,8 @@
-import { consolidateChampionData, consolidateRankedData } from "./data";
+import {
+  consolidateChampionData,
+  consolidateRankedData,
+  getSummonerLevel,
+} from "./data";
 import { RiotApiError } from "./errors";
 import { getAccountDTOByRiotId } from "./riot";
 
@@ -23,7 +27,7 @@ export async function handler(event: any) {
     const accountDTO = await getAccountDTOByRiotId(gameName, tagLine);
     const puuid = accountDTO.puuid;
 
-    return await consolidateRankedData(puuid);
+    return await getSummonerLevel(puuid);
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {

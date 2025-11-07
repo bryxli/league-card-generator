@@ -2,8 +2,14 @@ import { getChampionById } from "./champion";
 import {
   getAllChampionMasteryDTOByPuuid,
   getAllLeagueEntryDTOByPuuid,
+  getSummonerDTOByPuuid,
 } from "./riot";
 import type { ChampionData, RankedData } from "./types";
+
+export async function getSummonerLevel(puuid: string): Promise<number> {
+  const summonerDTO = await getSummonerDTOByPuuid(puuid);
+  return summonerDTO.summonerLevel;
+}
 
 export async function consolidateChampionData(
   puuid: string,
