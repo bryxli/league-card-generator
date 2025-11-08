@@ -3,7 +3,7 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 import { Buffer } from "buffer";
-import sharp from "sharp";
+import { Jimp } from "jimp";
 import {
   consolidateChampionData,
   consolidateMatchData,
@@ -82,11 +82,10 @@ export async function handler(event: any) {
     const imageBase64 = result?.images?.[0];
     if (!imageBase64) throw new Error("No image returned");
 
-    const imageBuffer = Buffer.from(imageBase64, "base64");
-    const compressedBuffer = await sharp(imageBuffer)
-      .resize({ width: 320 })
-      .jpeg({ quality: 80 })
-      .toBuffer();
+    const image = await Jimp.read(Buffer.from(imageBase64, "base64"));
+    const base64Image = await image.getBase64("image/jpeg", {
+      quality: 80,
+    });
 
     return {
       statusCode: 200,
@@ -94,7 +93,7 @@ export async function handler(event: any) {
         "Content-Type": "image/jpeg",
         "Cache-Control": "no-cache",
       },
-      body: compressedBuffer.toString("base64"),
+      body: base64Image,
       isBase64Encoded: true,
     };
   } catch (error) {
