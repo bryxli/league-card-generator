@@ -1,4 +1,8 @@
 import {
+  BedrockRuntimeClient,
+  InvokeModelCommand,
+} from "@aws-sdk/client-bedrock-runtime";
+import {
   consolidateChampionData,
   consolidateMatchData,
   consolidateRankedData,
@@ -6,6 +10,8 @@ import {
 } from "./data";
 import { RiotApiError } from "./errors";
 import { getAccountDTOByRiotId } from "./riot";
+
+const bedrock = new BedrockRuntimeClient({ region: "us-east-1" });
 
 export async function handler(event: any) {
   const query = event.queryStringParameters || {};
@@ -28,7 +34,61 @@ export async function handler(event: any) {
     const accountDTO = await getAccountDTOByRiotId(gameName, tagLine);
     const puuid = accountDTO.puuid;
 
-    return await consolidateChampionData(puuid);
+    const summonerLevel = await getSummonerLevel(puuid);
+    const rankedData = await consolidateRankedData(puuid);
+    const matchData = await consolidateMatchData(puuid);
+    const championData = await consolidateChampionData(puuid);
+
+    // const prompt = `
+    //   Generate a custom "League of Legends player card" image with this data:
+    //   Summoner: ${gameName}#${tagLine}
+    //   Summoner Level: ${summonerLevel}
+    //   Ranked Data: ${rankedData}
+    //   Recent Match Data: ${matchData}
+    //   Most Played Champions: ${championData}
+    //   Style: Clean modern trading card, glowing edges, dark background.
+    // `;
+
+    const prompt = `
+      Generate a custom "League of Legends player card" image with this data:
+      Summoner: ${gameName}#${tagLine}
+      Summoner Level: ${summonerLevel}
+      Ranked Data: ${rankedData}
+      Style: Clean modern trading card, glowing edges, dark background.
+    `;
+
+    const response = await bedrock.send(
+      new InvokeModelCommand({
+        modelId: process.env.BEDROCK_MODEL_ID!,
+        body: JSON.stringify({
+          taskType: "TEXT_IMAGE",
+          textToImageParams: {
+            text: prompt,
+            negativeText: "low quality, distorted, blurry",
+          },
+          imageGenerationConfig: {
+            width: 1024,
+            height: 1024,
+            cfgScale: 7.5,
+            seed: Math.floor(Math.random() * 99999),
+          },
+        }),
+      }),
+    );
+
+    return response;
+
+    // const result = JSON.parse(new TextDecoder().decode(response.body));
+    // const imageBase64 = result?.images?.[0];
+
+    // return {
+    //   statusCode: 200,
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({
+    //     championData,
+    //     image: imageBase64,
+    //   }),
+    // };
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {
