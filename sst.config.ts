@@ -16,7 +16,6 @@ export default $config({
       timeout: "2 minutes",
       environment: {
         RIOT_API_KEY: process.env.RIOT_API_KEY!,
-        BEDROCK_MODEL_ID: "amazon.titan-image-generator-v2:0",
       },
       permissions: [
         {

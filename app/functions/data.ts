@@ -54,7 +54,7 @@ export async function consolidateRankedData(
 export async function consolidateMatchData(
   puuid: string,
 ): Promise<MatchData[]> {
-  const matchIds = await getMatchIdsByPuuid(puuid, 16); // Set to retrieve last 16 matches due to rate limit of 20 requests/second
+  const matchIds = await getMatchIdsByPuuid(puuid, 10);
   return await Promise.all(
     matchIds.map(async (matchId) => {
       const matchDTO = await getMatchDTOById(matchId);
