@@ -41,23 +41,16 @@ export async function handler(event: any) {
     const matchData = await consolidateMatchData(puuid);
     const championData = await consolidateChampionData(puuid);
 
-    // const prompt = `
-    //   Generate a custom "League of Legends player card" image with this data:
-    //   Summoner: ${gameName}#${tagLine}
-    //   Summoner Level: ${summonerLevel}
-    //   Ranked Data: ${rankedData}
-    //   Recent Match Data: ${matchData}
-    //   Most Played Champions: ${championData}
-    //   Style: Clean modern trading card, glowing edges, dark background.
-    // `;
-
     const prompt = `
-      Generate a custom "MOBA fantasy game player card" image with this data:
-      Summoner: ${gameName}#${tagLine}
-      Summoner Level: ${summonerLevel}
-      Ranked Data: ${rankedData}
-      Style: Clean modern trading card, glowing edges, dark background.
-    `;
+You are an E-sports analyst.
+Generate a card for a League of Legends player with the name "${matchData[0].summonerName}" using the following details:
+- Player Level: ${summonerLevel}
+- Ranked Stats: ${rankedData}
+- Top 3 Favorite Champions: ${championData[0]}, ${championData[1]}, ${championData[2]}
+Design Requirements:
+- Layout: Modern trading card style with a clear header for the player name
+- Information: Display player level, ranked stats, and favorite champions prominently
+`;
 
     const response = await bedrock.send(
       new InvokeModelCommand({
@@ -89,12 +82,8 @@ export async function handler(event: any) {
 
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "image/jpeg",
-        "Cache-Control": "no-cache",
-      },
-      body: base64Image,
-      isBase64Encoded: true,
+      headers: { "Content-Type": "text/html" },
+      body: `<img src="${base64Image}" />`,
     };
   } catch (error) {
     if (error instanceof RiotApiError) {
