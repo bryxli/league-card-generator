@@ -2,6 +2,8 @@ import {
   BedrockRuntimeClient,
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
+import { Buffer } from "buffer";
+import sharp from "sharp";
 import {
   consolidateChampionData,
   consolidateMatchData,
@@ -50,7 +52,7 @@ export async function handler(event: any) {
     // `;
 
     const prompt = `
-      Generate a custom "League of Legends player card" image with this data:
+      Generate a custom "MOBA fantasy game player card" image with this data:
       Summoner: ${gameName}#${tagLine}
       Summoner Level: ${summonerLevel}
       Ranked Data: ${rankedData}
@@ -67,8 +69,8 @@ export async function handler(event: any) {
             negativeText: "low quality, distorted, blurry",
           },
           imageGenerationConfig: {
-            width: 1024,
-            height: 1024,
+            width: 320,
+            height: 704,
             cfgScale: 7.5,
             seed: Math.floor(Math.random() * 99999),
           },
@@ -76,19 +78,25 @@ export async function handler(event: any) {
       }),
     );
 
-    return response;
+    const result = JSON.parse(new TextDecoder().decode(response.body));
+    const imageBase64 = result?.images?.[0];
+    if (!imageBase64) throw new Error("No image returned");
 
-    // const result = JSON.parse(new TextDecoder().decode(response.body));
-    // const imageBase64 = result?.images?.[0];
+    const imageBuffer = Buffer.from(imageBase64, "base64");
+    const compressedBuffer = await sharp(imageBuffer)
+      .resize({ width: 320 })
+      .jpeg({ quality: 80 })
+      .toBuffer();
 
-    // return {
-    //   statusCode: 200,
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({
-    //     championData,
-    //     image: imageBase64,
-    //   }),
-    // };
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "image/jpeg",
+        "Cache-Control": "no-cache",
+      },
+      body: compressedBuffer.toString("base64"),
+      isBase64Encoded: true,
+    };
   } catch (error) {
     if (error instanceof RiotApiError) {
       return {
